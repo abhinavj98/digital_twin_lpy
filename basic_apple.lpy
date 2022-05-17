@@ -1,0 +1,135 @@
+import random as rd
+
+from openalea.plantgl.all import *#Polyline2D, unitstep, freq
+from numpy import arange
+
+from random import uniform, seed
+from math import pi
+from helper import *
+
+
+#Setup variables
+prune = False
+label = True
+curve_gui = False
+
+#Tree growth variables
+
+#Trunk guide variables
+L0 = 50
+freq = 30
+rd.seed(0)
+
+branches = 0
+radius = 1
+radinc =    0.005 # increment of radius through time
+
+#Prune at end of specified iteration according to pruning_strategy
+def EndEach(lstring):
+  global prune
+  frameDisplay(True)
+  if not prune:
+    return lstring
+  return pruning_strategy(getIterationNb(), lstring) #Overwrite this function
+  
+
+
+
+module A # represent trunk apical meristem
+module B # represent apical meristem of lateral branches
+module I # Internode
+
+
+Axiom: A(1,0)
+
+derivation length: 50
+
+production:
+A(t,o) :
+  global branches
+  if t <= 30:
+     # simply produces a metamer and ages the apex
+     if label:
+	     nproduce  SetColor(3)
+     nproduce SetGuide(gen_noise_branch(radius/100.,15),L0)I(1,0.05)
+     if t%10 == 0:
+       if label:
+       	nproduce SetColor(2)
+       if curve_gui:
+	       branches+=1
+	       nproduce [SetGuide(globals()["path_"+str(branches)],L0)&(90)B(0)]
+	       branches+=1       
+	       nproduce [SetGuide(globals()["path_"+str(branches)],L0)&(270)B(0)]
+       else:
+       	nproduce [SetGuide(gen_noise_branch(radius/100.,freq),L0)&(90)B(0)][SetGuide(gen_noise_branch(radius/100.,freq),L0)&(270)B(0)]
+       
+     produce A(t+1,o)
+       
+ 
+S(s,r) :
+  produce F(s,r)S(s,r)
+  
+B(l):
+  if l < 14: #Max branch length
+    if True:
+      nproduce I(1,0.01)
+      if label:
+        nproduce [SetColor(4)&(myrandom(1)*180)S(0.05,0.04)]B(l+1)
+      else:
+        nproduce [&(myrandom(1)*180)S(0.05,0.04)]B(l+1)
+    else:
+      produce I(1,0.01)B(l+1)
+  else:
+    produce *   	
+    
+# Increment radius of internodes
+I(s,r) --> I(s,r+radinc)
+S(s,r) --> S(s, r+radinc)
+_(r) --> _(r+radinc)
+
+homomorphism:
+
+I(a,r) --> F(a,r)
+S(a,r) --> F(a,r)
+ 
+###### INITIALISATION ######
+
+__lpy_code_version__ = 1.1
+
+def __initialiseContext__(context):
+	import openalea.plantgl.all as pgl
+	path_1 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.240061, -0.233945, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_1.name = "path_1"
+	path_2 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.166667, 0, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_2.name = "path_2"
+	path_3 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.166667, 0, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_3.name = "path_3"
+	path_4 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.166667, 0, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_4.name = "path_4"
+	path_5 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.166667, 0, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_5.name = "path_5"
+	path_6 = pgl.NurbsCurve2D(	
+	    ctrlPointList = pgl.Point3Array([(-0.5, 0, 1),(-0.166667, 0, 1),(0.166667, 0, 1),(0.5, 0, 1)]) , 
+	    )
+	path_6.name = "path_6"
+	panel_0 = ({'name': 'Panel 1', 'active': True, 'visible': True},[('Curve2D',path_1),('Curve2D',path_2),('Curve2D',path_3),('Curve2D',path_4),('Curve2D',path_5),('Curve2D',path_6)])
+	parameterset = [panel_0,]
+	context["__functions__"] = []
+	context["__curves__"] = [('path_1',path_1),('path_2',path_2),('path_3',path_3),('path_4',path_4),('path_5',path_5),('path_6',path_6),]
+	context["__parameterset__"] = parameterset
+	context["path_1"] = path_1
+	context["path_2"] = path_2
+	context["path_3"] = path_3
+	context["path_4"] = path_4
+	context["path_5"] = path_5
+	context["path_6"] = path_6

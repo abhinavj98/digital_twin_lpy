@@ -81,9 +81,3 @@ I(a,r) --> F(a,r)
 S(a,r) --> F(a,r)
 
 endlsystem
-###### INITIALISATION ######
-
-__lpy_code_version__ = 1.1
-
-def __initialiseContext__(context):
-	context.animation_timestep = 0.244
